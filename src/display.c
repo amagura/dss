@@ -48,7 +48,7 @@ void initDisplay()
     clear();
 }
 
-void displayLoop(Slide slides[], int* slideNumber, char* title, char* fileName)
+void displayLoop(struct Slide slides[], int* slideNumber, char* title, char* fileName)
 {
     initDisplay();
     while(quitting == 0) {
@@ -65,7 +65,7 @@ void displayLoop(Slide slides[], int* slideNumber, char* title, char* fileName)
 	// print bottom bar to screen
         mvprintw(max_y-1, 1, fileName);
         char bottomRightCounter[14];
-        sprintf(bottomRightCounter, "slide %i / %i", slides[*slideNumber].number, slideCount);
+        sprintf(bottomRightCounter, "slide %i / %i", slides[*slideNumber].index, slideCount);
         mvprintw(max_y-1, max_x-13, bottomRightCounter);
         // get the keypress from user
         int keyInput = getch();
