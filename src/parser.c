@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include "main.h"
 #include "parser.h"
+#include "slides.h"
 
 // defaults
 int x = 100;
@@ -73,7 +74,7 @@ char *delsub(char *str, const char *sub)
 /*     while (fgets()); */
 /* } */
 
-struct Slide* parseTXT(FILE *inFile, int* slideCounter, char *presTitle)
+struct slide* parseTXT(FILE *inFile, int* slideCounter, char *presTitle)
 {
     char buf[1000];
     while(fgets(buf, 1000, inFile)!=NULL) {
@@ -111,23 +112,30 @@ struct Slide* parseTXT(FILE *inFile, int* slideCounter, char *presTitle)
 
     // allocate memory to the heap for storing our array of slides
     // an array is used here to enable jumping to slides by number
-    struct Slide *slides = (struct Slide *)malloc(s * sizeof(*slides));
-    slides[0].content[0] = '\0'; // erases junk characters
+    // Slide* slides = (Slide*)malloc(s * sizeof(Slide)); original line
+    struct slide* slides = createSlideArray(s);
+    //slides[0].content[0] = '\0'; // erases junk characters
+    struct line *l = malloc(sizeof(struct line));
+    struct line *first = l;
+    l->content[0] = '\0';
     int i = 0;
     while(fgets(buf, 1000, inFile)!=NULL) {
-        if (strstr(buf, "_____")!=NULL || strstr(buf, "|")!=NULL) { // finds line of slide
-            strcat(slides[i].content, buf);
-        } else if (strstr(buf, "{ENDSLIDE}")!=NULL) { // iterate to the next slide
+        if (strstr(buf, "{ENDSLIDE}")!=NULL) { // iterate to the next slide
+            slides[i].first = first;
+            l = malloc(sizeof(struct line));
+            first = l;
             slides[i].index = i+1;
-            slides[i].x = x;
-            slides[i].y = y;
+	        slides[i].x = x;
+	        slides[i].y = y;
             slides[i].r = 0;
             slides[i].g = 0;
             slides[i].b = 0;
             i++;
             if (i>=s)
                 break;
-            slides[i].content[0] = '\0';
+        } else { // finds line of slide
+            strcat(l->content, buf);
+            l = nextLine(l);
         }
     }
     return slides;
