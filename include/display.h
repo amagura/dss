@@ -1,9 +1,9 @@
 #if !defined( DISPLAY_H )
-#define DISPLAY_H
-#include "parser.h"
+# define DISPLAY_H
+# include "parser.h"
 
 void setSlideCount(int *slides);
 void initDisplay();
-void displayLoop(struct Slide *slides, int *slideNumber, char *title, char *fileName);
+void displayLoop(struct slide slides[], int *slideNumber, char *title, char *fileName);
 
 #endif

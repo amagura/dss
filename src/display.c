@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "display.h"
+#include "slides.h"
 
 int slideCount;
 int max_x;
@@ -48,7 +49,7 @@ void initDisplay()
     clear();
 }
 
-void displayLoop(struct Slide slides[], int* slideNumber, char* title, char* fileName)
+void displayLoop(struct slide slides[], int *slideNumber, char *title, char *fileName)
 {
     initDisplay();
     while(quitting == 0) {
@@ -60,7 +61,13 @@ void displayLoop(struct Slide slides[], int* slideNumber, char* title, char* fil
 	} else {
            printw(title);
            printw("\n");
-           printw(slides[*slideNumber].content);
+           // print all lines in slide
+           struct line *curLine = slides[*slideNumber].first;
+           while(curLine) {
+               printw(curLine->content);
+               struct line *temp = curLine->next;
+               curLine = temp;
+           }
 	}
 	// print bottom bar to screen
         mvprintw(max_y-1, 1, fileName);
