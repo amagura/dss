@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
                      // -am
     title[0] = '\0';
     int currentSlide = 0;
-    Slide* slides = parseTXT(file, &slideCount, title);
+    struct Slide *slides = parseTXT(file, &slideCount, title);
     // close file after parsing
     fclose(file);
     setSlideCount(&slideCount);
