@@ -7,9 +7,9 @@
 #include "slides.h"
 
 // defaults
-int x = 100;
-int y = 30;
-int s = 15;
+int x;
+int y;
+int s;
 char *globalTitle;
 
 /* Removes sub from str */
@@ -118,6 +118,7 @@ struct slide* parseTXT(FILE *inFile, int* slideCounter, char *presTitle)
     struct line *l = malloc(sizeof(struct line));
     struct line *first = l;
     l->content[0] = '\0';
+    int curMaxLen = 0;
     int i = 0;
     while(fgets(buf, 1000, inFile)!=NULL) {
         if (strstr(buf, "{ENDSLIDE}")!=NULL) { // iterate to the next slide
@@ -125,6 +126,8 @@ struct slide* parseTXT(FILE *inFile, int* slideCounter, char *presTitle)
             l = malloc(sizeof(struct line));
             first = l;
             slides[i].index = i+1;
+            slides[i].maxLen = curMaxLen;
+            curMaxLen = 0;
 	        slides[i].x = x;
 	        slides[i].y = y;
             slides[i].r = 0;
@@ -136,6 +139,15 @@ struct slide* parseTXT(FILE *inFile, int* slideCounter, char *presTitle)
         } else { // finds line of slide
             strcat(l->content, buf);
             l = nextLine(l);
+            // update curMaxLen
+            char end = '\n';
+            char *ptr = strchr(buf, end);
+            if (ptr) {
+                int n = ptr - buf;
+                if (n>curMaxLen) {
+                    curMaxLen = n;
+                }
+            }
         }
     }
     return slides;
