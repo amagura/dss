@@ -8,9 +8,9 @@
 #include "slides.h"
 
 // defaults
-int x = 0;
-int y = 0;
-int s = 0;
+int x = -1;
+int y = -1;
+int s = -1;
 char *globalTitle = NULL;
 
 int scanr(FILE *fp, struct Ptx *ptx)
@@ -36,6 +36,16 @@ int scanr(FILE *fp, struct Ptx *ptx)
         lnptr = buf;
         tmp = malloc(size);
 #endif
+        if (y == -1 && strstr(lnptr, ".start->>") != NULL) {
+            while (fgets(lnptr, size, fp) != NULL) {
+                if (strstr(lnptr, ".end<<-") == NULL) {
+                    ++y;
+                } else {
+                    break;
+                }
+            }
+        }
+
         if (strstr(lnptr, "title=") != NULL) {
             /* get title from file
              * FIXME: we should do something else other than title=
@@ -49,27 +59,22 @@ int scanr(FILE *fp, struct Ptx *ptx)
                 fprintf(stderr, "%s: %s\n", PROGNAME, "malformed title field");
                 return 1;
             }
-        } else if (strstr(lnptr, ".start>>") != NULL) {
-            while
-            .end<<
+        /* } else if (strstr(lnptr, "areaX=") != NULL) { */
+        /*     if (sscanf(lnptr, "%*[^\"]\"%d[^\"]\"", &x) != 1) { */
+        /*         fprintf(stderr, "%s: %s\n", PROGNAME, "malformed area X field"); */
+        /*         return 2; */
+        /*     } */
+        /* } else if (strstr(lnptr, "areaY=") != NULL) { */
+        /*     if (sscanf(lnptr, "%*[^\"]\"%d[^\"]\"", &y) != 1) { */
+        /*         fprintf(stderr, "%s: %s\n", PROGNAME, "malformed area Y field"); */
+        /*         return 3; */
+        /*     } */
+            /* FIXME: replace this with a slide counter */
+        /* } else if ((regexec(&rgx, line, 0, NULL, 0)) == 0) { */
+        /*     ++data->sld_cnt; */
         } else {
             /* determine x area */
             x = strlen(lnptr);
-        }
-            strchr
-        } else if (strstr(line, "areaX=") != NULL) {
-            if (sscanf(line, "%*[^\"]\"%d[^\"]\"", &x) != 1) {
-                fprintf(stderr, "%s: %s\n", PROGNAME, "malformed area X field");
-                return 2;
-            }
-        } else if (strstr(line, "areaY=") != NULL) {
-            if (sscanf(line, "%*[^\"]\"%d[^\"]\"", &y) != 1) {
-                fprintf(stderr, "%s: %s\n", PROGNAME, "malformed area Y field");
-                return 3;
-            }
-            /* FIXME: replace this with a slide counter */
-        } else if ((regexec(&rgx, line, 0, NULL, 0)) == 0) {
-            ++data->sld_cnt;
         }
 
     return 0;
