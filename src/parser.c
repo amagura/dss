@@ -2,56 +2,78 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <limits.h>
 #include "main.h"
 #include "parser.h"
 #include "slides.h"
 
 // defaults
-int x;
-int y;
-int s;
-char *globalTitle;
+int x = 0;
+int y = 0;
+int s = 0;
+char *globalTitle = NULL;
 
-/* int scanr(FILE *ptx, struct Ptx *data, struct Slide **slds) */
-/* { */
-/*     char *line = NULL; */
-/*     size_t len = 0; */
-/*     size_t read = 0; */
-/*  */
-/* // XXX we're not actually using a regular buffer, since */
-/* // we're reading the file by line; not block by block */
-/*  */
-/* #<{(| #if _DEFAULT_SOURCE || ! (_POSIX_C_SOURCE >= 200112L) |)}># */
-/* #<{(| # if DSS_DEBUG |)}># */
-/* #<{(|     fprintf(stderr, "%s\n", "we're using getpagesize\n"); |)}># */
-/* #<{(| # endif |)}># */
-/* #<{(|     #<{(| gives us a good starting point for buffer size. |)}># |)}># */
-/* #<{(|     size_t pgsz = getpagesize(); |)}># */
-/* #<{(| #else |)}># */
-/* #<{(|     size_t pgsz = 4096; |)}># */
-/* #<{(| #endif |)}># */
-/* #<{(|  |)}># */
-/* #<{(|     char *buf = malloc(pgsz * sizeof(*buf)); |)}># */
-/*  */
-/*     #<{(| if we have getline, let's use that |)}># */
-/* #if _POSIX_C_SOURCE >= 200809L */
-/* # if DSS_DEBUG */
-/*         fprintf(stderr, "%s\n", "we're using getline\n"); */
-/* # endif */
-/*         while ((read = getline(&line, &len, ptx)) != EOF) { */
-/*             #<{(| process the file |)}># */
-/*  */
-/*             #<{(| get title from file */
-/*              * FIXME: we should do something else other than title= */
-/*              * like @title or something */
-/*              |)}># */
-/*             if (strstr(line, "title=") != NULL) { */
-/*  */
-/*  */
-/* #endif */
-/*  */
-/*     while (fgets()); */
-/* } */
+int scanr(FILE *fp, struct Ptx *ptx)
+{
+    char *lnptr, *tmp = lnptr = NULL;
+
+#if HAVE_GETLINE
+    /* TODO if we don't have getline, we'll need to use
+     * fgets
+     */
+    char *line = NULL;
+    size_t size, len, read = len = size = 0;
+
+    while ((read = getline(&line, &len, fp)) != EOF) {
+        lnptr = line;
+        size = strlen(line) + 1;
+        tmp = malloc(size);
+#else
+    char *buf = NULL;
+    size_t size = 4096;
+    buf = malloc(size * sizeof(*buf));
+    while(fgets(buf, size, fp) != NULL) {
+        lnptr = buf;
+        tmp = malloc(size);
+#endif
+        if (strstr(lnptr, "title=") != NULL) {
+            /* get title from file
+             * FIXME: we should do something else other than title=
+             * like @title or something
+             */
+
+            if (sscanf(lnptr, "%*[^\"]\"%127[^\"]\"", tmp) == 1) {
+                ptx->title = strdup(tmp);
+                free(tmp);
+            } else {
+                fprintf(stderr, "%s: %s\n", PROGNAME, "malformed title field");
+                return 1;
+            }
+        } else if (strstr(lnptr, ".start>>") != NULL) {
+            while
+            .end<<
+        } else {
+            /* determine x area */
+            x = strlen(lnptr);
+        }
+            strchr
+        } else if (strstr(line, "areaX=") != NULL) {
+            if (sscanf(line, "%*[^\"]\"%d[^\"]\"", &x) != 1) {
+                fprintf(stderr, "%s: %s\n", PROGNAME, "malformed area X field");
+                return 2;
+            }
+        } else if (strstr(line, "areaY=") != NULL) {
+            if (sscanf(line, "%*[^\"]\"%d[^\"]\"", &y) != 1) {
+                fprintf(stderr, "%s: %s\n", PROGNAME, "malformed area Y field");
+                return 3;
+            }
+            /* FIXME: replace this with a slide counter */
+        } else if ((regexec(&rgx, line, 0, NULL, 0)) == 0) {
+            ++data->sld_cnt;
+        }
+
+    return 0;
+}
 
 struct slide* parseTXT(FILE *inFile, int* slideCounter, char *presTitle)
 {
