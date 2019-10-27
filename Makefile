@@ -27,6 +27,28 @@ else
   CFLAGS += -O2
 endif
 
+# check for getline
+ifneq (, $(shell ldconfig -p | grep 'libc\b' \
+  | awk '{print $$NF}' \
+  | xargs nm -g 2> /dev/null \
+  | grep getline -m 1 -q \
+  && echo HAS_GETLINE))
+  CPPFLAGS += -DHAVE_GETLINE=1
+else
+  CPPFLAGS += -DHAVE_GETLINE=0
+endif
+
+# check for getpagesize
+ifneq (, $(shell ldconfig -p | grep 'libc\b' \
+  | awk '{print $$NF}' \
+  | xargs -nm -g 2> /dev/null \
+  | grep getpagesize -m 1 -q \
+  && echo HAS_GETPAGESIZE))
+  CPPFLAGS += -DHAVE_GETPAGESIZE=1
+else
+  CPPFLAGS += -DHAVE_GETPAGESIZE=0
+endif
+
 all: dss
 
 # XXX only needed because of -I ./include:
@@ -41,6 +63,9 @@ dss: $(OBJS)
 tidy:
 	$(RM) *.o
 	$(RM) src/*.o
+
+vars:
+	echo $(CPPFLAGS)
 
 clean: tidy
 	$(RM) dss
