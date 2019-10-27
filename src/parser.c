@@ -36,15 +36,6 @@ int scanr(FILE *fp, struct Ptx *ptx)
         lnptr = buf;
         tmp = malloc(size);
 #endif
-        if (y == -1 && strstr(lnptr, ".start->>") != NULL) {
-            while (fgets(lnptr, size, fp) != NULL) {
-                if (strstr(lnptr, ".end<<-") == NULL) {
-                    ++y;
-                } else {
-                    break;
-                }
-            }
-        }
 
         if (strstr(lnptr, "title=") != NULL) {
             /* get title from file
@@ -72,9 +63,19 @@ int scanr(FILE *fp, struct Ptx *ptx)
             /* FIXME: replace this with a slide counter */
         /* } else if ((regexec(&rgx, line, 0, NULL, 0)) == 0) { */
         /*     ++data->sld_cnt; */
-        } else {
-            /* determine x area */
-            x = strlen(lnptr);
+        } else if (strstr(lnptr, "{STARTSLIDES}") != NULL) {
+            if (y == -1 && strstr(lnptr, ".start{}") != NULL) {
+                while (fgets(lnptr, size, fp) != NULL) {
+                    if (strstr(lnptr, ".end{}") == NULL) {
+                        x = x == -1 ? (int)strlen(lnptr) : x;
+                        ++y;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            rewind(fp);
+            break;
         }
     }
     return 0;
@@ -82,8 +83,9 @@ int scanr(FILE *fp, struct Ptx *ptx)
 
 struct slide* parseTXT(FILE *inFile, int* slideCounter, char *presTitle)
 {
-    char buf[1000];
-    while(fgets(buf, 1000, inFile)!=NULL) {
+    size_t sz = 4096;
+    char *buf = malloc(sz * sizeof(*buf));
+    while(fgets(buf, sz, inFile)!=NULL) {
         if (strstr(buf, "title=")!=NULL) { // finds title line
             char quoted[128];
             if (sscanf(buf, "%*[^\"]\"%127[^\"]\"", quoted) == 1) {
@@ -125,22 +127,22 @@ struct slide* parseTXT(FILE *inFile, int* slideCounter, char *presTitle)
     struct line *first = l;
     l->content[0] = '\0';
     int curMaxLen = 0;
-    int i = 0;
+    int jndx = 0;
     while(fgets(buf, 1000, inFile)!=NULL) {
         if (strstr(buf, "{ENDSLIDE}")!=NULL) { // iterate to the next slide
-            slides[i].first = first;
+            slides[jndx].first = first;
             l = malloc(sizeof(struct line));
             first = l;
-            slides[i].index = i+1;
-            slides[i].maxLen = curMaxLen;
+            slides[jndx].maxLen = curMaxLen;
             curMaxLen = 0;
-	        slides[i].x = x;
-	        slides[i].y = y;
-            slides[i].r = 0;
-            slides[i].g = 0;
-            slides[i].b = 0;
-            i++;
-            if (i>=s)
+	        slides[jndx].x = x;
+	        slides[jndx].y = y;
+            slides[jndx].r = 0;
+            slides[jndx].g = 0;
+            slides[jndx].b = 0;
+            ++jndx;
+            slides[jndx].index = jndx;
+            if (jndx >= s)
                 break;
         } else { // finds line of slide
             strcat(l->content, buf);
