@@ -76,7 +76,7 @@ int scanr(FILE *fp, struct Ptx *ptx)
             /* determine x area */
             x = strlen(lnptr);
         }
-
+    }
     return 0;
 }
 
