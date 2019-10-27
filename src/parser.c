@@ -12,27 +12,6 @@ int y;
 int s;
 char *globalTitle;
 
-/* Removes sub from str */
-char *delsub(char *str, const char *sub)
-{
-    size_t n = strlen(str);
-
-    char *token, *newp;
-    token = newp = NULL;
-
-    if ((token = strtok(str, sub)) != NULL) {
-        newp = malloc(n * sizeof(*newp));
-        strcat(newp, token);
-
-        while ((token = strtok(NULL, sub)) != NULL) {
-            strcat(newp, token);
-        }
-        memmove(str, newp, n);
-        free(newp);
-    }
-    return str;
-}
-
 /* int scanr(FILE *ptx, struct Ptx *data, struct Slide **slds) */
 /* { */
 /*     char *line = NULL; */
