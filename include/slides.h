@@ -4,6 +4,7 @@
 struct slide
 {
     int index;
+    int maxLen;
     int x, y, r, g, b;
     struct line *first;
 };
