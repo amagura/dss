@@ -2,24 +2,13 @@
 #include <stdlib.h>
 #include "slides.h"
 
-
-
 struct slide* createSlideArray(int s) {
     struct slide* slides = (struct slide*)malloc(s * sizeof(struct slide));
     return slides;
 }
 
-// not currently in use
-//line *newLine() {
-    //line *n = malloc(sizeof(line));
-    //n->content[0] = '\0'; // fixes junk text
-    //n->prev = n->next = NULL;
-    //n->r = n->g = n->b = 0;
-    //return n;
-//}
-
 struct line *nextLine(struct line *prev) {
-    struct line *n = malloc(sizeof(struct line));
+     struct line *n = malloc(sizeof(struct line));
     n->prev = prev;
     prev->next = n;
     return n;

@@ -120,6 +120,7 @@ struct slide* parseTXT(FILE *inFile, int* slideCounter, char *presTitle)
 
     // allocate memory to the heap for storing our array of slides
     // an array is used here to enable jumping to slides by number
+# if 0
     // Slide* slides = (Slide*)malloc(s * sizeof(Slide)); original line
     struct slide* slides = createSlideArray(s);
     //slides[0].content[0] = '\0'; // erases junk characters
@@ -127,34 +128,64 @@ struct slide* parseTXT(FILE *inFile, int* slideCounter, char *presTitle)
     struct line *first = l;
     l->content[0] = '\0';
     int curMaxLen = 0;
-    int jndx = 0;
+    int indx = 0;
+# endif
+    struct slide* slides = createSlideArray(s);
+
+    // create a line pointer, l is for iterating while first is
+    // the pointer used in each slide struct
+    struct line *l = malloc(sizeof(struct line));
+    struct line *first = l;
+    l->content[0] = '\0';
+
+    // curMaxX and curY are used to set x/y values to slides
+    int curMaxX = 0;
+    int curY = 0;
+
+    // continue itteration over file
+    int indx = 0;
     while(fgets(buf, 1000, inFile)!=NULL) {
         if (strstr(buf, "{ENDSLIDE}")!=NULL) { // iterate to the next slide
-            slides[jndx].first = first;
+            slides[indx].first = first;
             l = malloc(sizeof(struct line));
             first = l;
-            slides[jndx].maxLen = curMaxLen;
-            curMaxLen = 0;
-	        slides[jndx].x = x;
-	        slides[jndx].y = y;
-            slides[jndx].r = 0;
-            slides[jndx].g = 0;
-            slides[jndx].b = 0;
-            ++jndx;
-            slides[jndx].index = jndx;
-            if (jndx >= s)
+            /* slides[indx].maxLen = curMaxLen; */
+            /* curMaxLen = 0; */
+	        /* slides[indx].x = x; */
+	        /* slides[indx].y = y; */
+            /* slides[indx].r = 0; */
+            /* slides[indx].g = 0; */
+            /* slides[indx].b = 0; */
+            /* ++indx; */
+            /* slides[indx].index = indx; */
+            /* if (indx >= s) */
+            slides[indx].index = indx+1;
+            // assign curMaxX to x, reset variable
+            slides[indx].maxX = curMaxX;
+            curMaxX = 0;
+            // assign curY to y, reset variable
+	        slides[indx].y = curY;
+            curY = 0;
+            slides[indx].r = 0;
+            slides[indx].g = 0;
+            slides[indx].b = 0;
+            indx++;
+            if (indx>=s)
                 break;
-        } else { // finds line of slide
+        } else {
+            // add buf to current line and itterate to the next
             strcat(l->content, buf);
             l = nextLine(l);
-            // update curMaxLen
+
+            // update curMaxX only if line is longer that previous lines
             char end = '\n';
             char *ptr = strchr(buf, end);
             if (ptr) {
                 int n = ptr - buf;
-                if (n>curMaxLen) {
-                    curMaxLen = n;
+                if (n>curMaxX) {
+                    curMaxX = n;
                 }
+                curY++;
             }
         }
     }

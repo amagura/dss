@@ -4,8 +4,9 @@
 struct slide
 {
     int index;
-    int maxLen;
-    int x, y, r, g, b;
+    int maxX;
+    int y;
+    int r, g, b;
     struct line *first;
 };
 
@@ -16,11 +17,10 @@ struct line {
     struct line *next;
 };
 
-struct slide* createSlideArray(int s);
+struct slide *createSlideArray(int s);
 // not currently in use
 // line *newLine();
 struct line *nextLine(struct line *prev);
 void freeSlides(struct slide *slide[], int s);
 void freeLines(struct line *first);
-
 #endif
