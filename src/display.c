@@ -618,10 +618,10 @@ slide* handleKeyPress(slide *curSlide)
     return curSlide;
 }
 
-int displayLoop(slide *curSlide, int* slideCount, char* title, char* fileName)
+int displayLoop(struct slides ss, char* title, char* fileName)
 {
     while(quitting == false) {
-        numOfSlides = *slideCount;
+        numOfSlides = ss.cnt;
 
         // assigns screen x/y length continually (incase of screen resize)
         getmaxyx(stdscr, max_y, max_x);
@@ -637,31 +637,31 @@ int displayLoop(slide *curSlide, int* slideCount, char* title, char* fileName)
         // if the screen is too small/zoomed in, dispay a soft error
         // otherwise, print the slide(s)
         if (doubleSlideDisplayMode==0) {
-            if (curSlide->maxX> max_x-1 || curSlide->y > max_y-2) {
+            if (ss.cur->maxX> max_x-1 || ss.cur->y > max_y-2) {
             printw("terminal size/zoom error: Please resize or zoom out the terminal to display the slide.");
             } else {
-            printSlideAtPosition((max_x - curSlide->maxX) / 2, (max_y-curSlide->y)/2, curSlide);
+            printSlideAtPosition((max_x - ss.cur->maxX) / 2, (max_y-ss.cur->y)/2, ss.cur);
             }
         } else {
             // always stay one slide less than numOfSlides so that two slides can be printed
-            if (curSlide->number == numOfSlides) {
-                curSlide = curSlide->prev;
+            if (ss.cur->number == numOfSlides) {
+                ss.cur = ss.cur->prev;
             }
             
             // find max y length of both slides
             int maxYLenBetweenSlides;
-            if (curSlide->y > curSlide->next->y) {
-                maxYLenBetweenSlides = curSlide->y;
+            if (ss.cur->y > ss.cur->next->y) {
+                maxYLenBetweenSlides = ss.cur->y;
             } else {
-                maxYLenBetweenSlides = curSlide->next->y;
+                maxYLenBetweenSlides = ss.cur->next->y;
             }
 
             // todo: if statement is ugly
-            if (curSlide->maxX + curSlide->next->maxX > max_x-2 || maxYLenBetweenSlides > max_y-2) {
+            if (ss.cur->maxX + ss.cur->next->maxX > max_x-2 || maxYLenBetweenSlides > max_y-2) {
                 printw("terminal size/zoom error: Please resize or zoom out the terminal to display the slide.");
             } else {
-                printSlideAtPosition(((max_x/2) - curSlide->maxX) / 2, (max_y-curSlide->y)/2, curSlide);
-                printSlideAtPosition(((max_x/2) + ((max_x/2) - curSlide->next->maxX) / 2), (max_y-curSlide->next->y)/2, curSlide->next);
+                printSlideAtPosition(((max_x/2) - ss.cur->maxX) / 2, (max_y-ss.cur->y)/2, ss.cur);
+                printSlideAtPosition(((max_x/2) + ((max_x/2) - ss.cur->next->maxX) / 2), (max_y-ss.cur->next->y)/2, ss.cur->next);
             }
         }
         
@@ -669,14 +669,14 @@ int displayLoop(slide *curSlide, int* slideCount, char* title, char* fileName)
         mvprintw(max_y-1, 0, fileName);
         char bottomRightCounter[20];
         if (!doubleSlideDisplayMode) {
-            sprintf(bottomRightCounter, "%i / %i", curSlide->number, numOfSlides);
+            sprintf(bottomRightCounter, "%i / %i", ss.cur->number, numOfSlides);
         } else {
-            sprintf(bottomRightCounter, "%i-%i / %i", curSlide->number,curSlide->number+1, numOfSlides);
+            sprintf(bottomRightCounter, "%i-%i / %i", ss.cur->number,ss.cur->number+1, numOfSlides);
         }
         mvprintw(max_y-1, max_x-strlen(bottomRightCounter), bottomRightCounter);
 
         // handle key presses
-        curSlide = handleKeyPress(curSlide);
+        ss.cur = handleKeyPress(ss.cur);
 
         // clear the screen for next loop to print
         clear();

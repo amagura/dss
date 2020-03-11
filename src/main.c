@@ -99,8 +99,11 @@ int main(int argc, char *argv[])
         }
 
         // initiate display loop, when it returns store exit code
-        returnCode = displayLoop(beg, &slideCount, title, fileName);
-        
+        struct slides ss;
+        ss.cur = beg;
+        ss.cnt = slideCount;
+        returnCode = displayLoop(ss, title, fileName);
+
         // free slides and lines
         int i;
         slide *first = beg;
